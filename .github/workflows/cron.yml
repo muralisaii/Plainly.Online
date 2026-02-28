@@ -9,17 +9,8 @@ jobs:
   call-api:
     runs-on: ubuntu-latest
     steps:
-
-      - name: Debug Secret
-        run: |
-          if [ -z "${{ secrets.RSS_SECRET }}" ]; then
-            echo "Secret is EMPTY"
-          else
-            echo "Secret is SET"
-          fi
-
       - name: Call RSS API
         run: |
-          curl -X GET \
+          curl -f -X GET \
           -H "Authorization: Bearer ${{ secrets.RSS_SECRET }}" \
           https://plainlyonline.vercel.app/api/rss-fetch
