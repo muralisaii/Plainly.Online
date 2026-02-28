@@ -1,0 +1,16 @@
+name: RSS Cron Job
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # Every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  call-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call RSS API
+        run: |
+          curl -X GET \
+          -H "Authorization: Bearer ${{ secrets.RSS_SECRET = MR_SAD_LONELY_MAN }}" \
+          https://plainlyonline.vercel.app/api/rss-fetch
