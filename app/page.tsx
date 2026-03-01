@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
 type Article = {
   id: string
   title: string

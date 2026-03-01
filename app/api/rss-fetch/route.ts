@@ -47,42 +47,58 @@ export async function GET(request: Request) {
             throw new Error("Categories not found")
         }
 
-        // 2️⃣ Fetch RSS
-        const articles = await fetchRSS(
-            "https://feeds.bbci.co.uk/news/rss.xml"
-        )
+        // 2️⃣ Define feeds
+        const feeds = [
+            { name: "BBC", url: "https://feeds.bbci.co.uk/news/rss.xml" },
+            { name: "Reuters", url: "https://feeds.reuters.com/reuters/topNews" },
+            { name: "NYT", url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" }
+        ]
 
-        // 3️⃣ Prepare rows for batch insert
-        const rows = articles.slice(0, 10).map((article) => {
-            const slug = generateSlug(article.title)
+        let allRows: any[] = []
 
-            const categoryId = mapCategory(
-                article.title,
-                categories
-            )
+        // 3️⃣ Fetch each feed safely
+        for (const feed of feeds) {
+            try {
+                const articles = await fetchRSS(feed.url)
 
-            const trendingScore = calculateTrendingScore(
-                article.published_at
-            )
+                const rows = articles.slice(0, 10).map((article) => {
+                    const slug = generateSlug(article.title)
 
-            return {
-                title: article.title,
-                slug,
-                description: article.description,
-                content: article.content,
-                image_url: null,
-                source: "BBC",
-                source_url: article.link,
-                published_at: article.published_at,
-                trending_score: trendingScore,
-                category_id: categoryId,
+                    const categoryId = mapCategory(
+                        article.title,
+                        categories
+                    )
+
+                    const trendingScore = calculateTrendingScore(
+                        article.published_at
+                    )
+
+                    return {
+                        title: article.title,
+                        slug,
+                        description: article.description,
+                        content: article.content,
+                        image_url: null,
+                        source: feed.name,
+                        source_url: article.link,
+                        published_at: article.published_at,
+                        trending_score: trendingScore,
+                        category_id: categoryId,
+                    }
+                })
+
+                allRows.push(...rows)
+
+            } catch (err) {
+                console.error(`Feed failed: ${feed.name}`, err)
+                continue
             }
-        })
+        }
 
-        // 4️⃣ Single batch upsert
+        // 4️⃣ Batch upsert all feeds together
         const { error } = await supabaseAdmin
             .from("articles")
-            .upsert(rows, { onConflict: "source_url" })
+            .upsert(allRows, { onConflict: "source_url" })
 
         if (error) {
             throw error

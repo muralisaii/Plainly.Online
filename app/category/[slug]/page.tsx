@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
 type Article = {
   id: string
   title: string
