@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 300 // 5 minutes
 type Article = {
   id: string
   title: string
