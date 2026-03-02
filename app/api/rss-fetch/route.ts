@@ -89,7 +89,7 @@ export async function GET(request: Request) {
               slug,
               description: article.description,
               content: article.content,
-              image_url: null,
+              image_url: article.image_url,
               source: feed.name,
               source_url: article.link,
               published_at: article.published_at,

@@ -1,7 +1,8 @@
 import { supabase } from "@/lib/supabase"
 import { notFound } from "next/navigation"
 
-export const revalidate = 300 // 5 minutes
+export const revalidate = 300
+
 type Article = {
   id: string
   title: string
@@ -15,12 +16,25 @@ type Article = {
   categories: { name: string; slug: string }[] | null
 }
 
+function getCategoryFallback(slug?: string) {
+  switch (slug) {
+    case "technology":
+      return "/images/tech-default.jpg"
+    case "india":
+      return "/images/india-default.jpg"
+    case "world":
+      return "/images/world-default.jpg"
+    case "business":
+      return "/images/business-default.jpg"
+    default:
+      return "/images/default-news.jpg"
+  }
+}
+
 export default async function ArticlePage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
-
-  console.log("Slug param:", slug)
 
   const { data, error } = await supabase
     .from("articles")
@@ -50,6 +64,7 @@ export default async function ArticlePage(
 
   return (
     <main className="p-6 max-w-3xl mx-auto">
+
       <h1 className="text-3xl font-bold mb-4">
         {article.title}
       </h1>
@@ -58,13 +73,14 @@ export default async function ArticlePage(
         {article.categories?.[0]?.name}
       </p>
 
-      {article.image_url && (
-        <img
-          src={article.image_url}
-          alt={article.title}
-          className="mb-6 rounded"
-        />
-      )}
+      <img
+        src={
+          article.image_url ||
+          getCategoryFallback(article.categories?.[0]?.slug)
+        }
+        alt={article.title}
+        className="mb-6 rounded w-full h-96 object-cover"
+      />
 
       <div className="space-y-4">
         <p>{article.description}</p>
@@ -72,31 +88,4 @@ export default async function ArticlePage(
       </div>
     </main>
   )
-}
-export async function generateMetadata(
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug } = await params
-
-  const { data } = await supabase
-    .from("articles")
-    .select("title, description, image_url")
-    .eq("slug", slug)
-    .single()
-
-  if (!data) {
-    return {
-      title: "Article Not Found",
-    }
-  }
-
-  return {
-    title: data.title,
-    description: data.description || "",
-    openGraph: {
-      title: data.title,
-      description: data.description || "",
-      images: data.image_url ? [data.image_url] : [],
-    },
-  }
 }
