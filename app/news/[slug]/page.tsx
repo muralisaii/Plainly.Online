@@ -33,18 +33,18 @@ function getCategoryFallback(slug?: string) {
 }
 
 function timeAgo(dateString?: string | null) {
-  if (!dateString) return ""
+    if (!dateString) return ""
 
-  const now = new Date()
-  const published = new Date(dateString)
-  const diffMs = now.getTime() - published.getTime()
+    const now = new Date()
+    const published = new Date(dateString)
+    const diffMs = now.getTime() - published.getTime()
 
-  const hours = Math.floor(diffMs / (1000 * 60 * 60))
-  const days = Math.floor(hours / 24)
+    const hours = Math.floor(diffMs / (1000 * 60 * 60))
+    const days = Math.floor(hours / 24)
 
-  if (hours < 1) return "Just now"
-  if (hours < 24) return `${hours}h ago`
-  return `${days}d ago`
+    if (hours < 1) return "Just now"
+    if (hours < 24) return `${hours}h ago`
+    return `${days}d ago`
 }
 
 export default async function ArticlePage(
@@ -90,6 +90,7 @@ export default async function ArticlePage(
             </p>
 
             <div className="relative w-full h-96 mb-6">
+
                 <Image
                     src={
                         article.image_url ||
@@ -97,10 +98,12 @@ export default async function ArticlePage(
                     }
                     alt={article.title}
                     fill
-                    className="object-cover rounded"
-                    sizes="100vw"
+                    className="object-cover rounded-lg"
+                    sizes="(max-width:768px) 100vw, 1200px"
+                    quality={90}
                     priority
                 />
+
             </div>
 
             <div className="space-y-4">

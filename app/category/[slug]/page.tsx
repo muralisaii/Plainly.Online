@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 export const revalidate = 300
 
@@ -30,6 +31,7 @@ function getCategoryFallback(slug?: string) {
 export default async function CategoryPage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
+
   const { slug } = await params
 
   const { data: category } = await supabase
@@ -62,25 +64,37 @@ export default async function CategoryPage(
       )}
 
       {articles?.map((article: Article) => (
+
         <Link key={article.id} href={`/news/${article.slug}`}>
+
           <div className="flex gap-4 mb-6 hover:bg-gray-50 p-3 rounded cursor-pointer">
 
-            <img
-              src={
-                article.image_url ||
-                getCategoryFallback(category.slug)
-              }
-              alt={article.title}
-              className="w-28 h-20 object-cover rounded"
-            />
+            <div className="relative w-28 h-20">
+
+              <Image
+                src={
+                  article.image_url ||
+                  getCategoryFallback(category.slug)
+                }
+                alt={article.title}
+                fill
+                className="object-cover rounded"
+                sizes="112px"
+                quality={90}
+              />
+
+            </div>
 
             <h2 className="text-xl font-semibold">
               {article.title}
             </h2>
 
           </div>
+
         </Link>
+
       ))}
+
     </main>
   )
 }

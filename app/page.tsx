@@ -48,6 +48,7 @@ function timeAgo(dateString?: string | null) {
 }
 
 export default async function Home() {
+
   const baseQuery = `
   id,
   title,
@@ -66,23 +67,20 @@ export default async function Home() {
   const { data: breaking } = await supabase
     .from("articles")
     .select(baseQuery)
-    .order("trending_score", { ascending: false })
+    .order("published_at", { ascending: false })
     .limit(1)
-    .overrideTypes<Article[]>()
 
   const { data: trending } = await supabase
     .from("articles")
     .select(baseQuery)
-    .order("trending_score", { ascending: false })
+    .order("published_at", { ascending: false })
     .range(1, 4)
-    .overrideTypes<Article[]>()
 
   const { data: more } = await supabase
     .from("articles")
     .select(baseQuery)
-    .order("trending_score", { ascending: false })
+    .order("published_at", { ascending: false })
     .range(5, 14)
-    .overrideTypes<Article[]>()
 
   return (
     <main className="p-6 max-w-6xl mx-auto space-y-12">
@@ -90,13 +88,15 @@ export default async function Home() {
       {/* Breaking */}
       {breaking?.[0] && (
         <section className="space-y-6">
+
           <h2 className="text-2xl font-bold">🔥 Breaking</h2>
 
           <Link href={`/news/${breaking[0].slug}`}>
+
             <article className="cursor-pointer space-y-6 group">
 
-              {/* Image */}
               <div className="relative w-full h-[420px] rounded-xl overflow-hidden">
+
                 <Image
                   src={
                     breaking[0].image_url ||
@@ -104,52 +104,59 @@ export default async function Home() {
                   }
                   alt={breaking[0].title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="100vw"
+                  className="object-cover"
+                  sizes="(max-width:768px) 100vw, 1200px"
+                  quality={90}
                   priority
                 />
 
-                {/* Dark gradient overlay for readability */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
               </div>
 
-              {/* Meta + Title */}
               <div className="space-y-3">
 
-                {/* Meta Line */}
                 <p className="text-sm text-gray-500">
-                  {breaking[0].categories?.[0]?.name}{" "}
+                  {breaking[0].categories?.[0]?.name} {" "}
                   {timeAgo(breaking[0].published_at)} •{" "}
                   {breaking[0].source}
                 </p>
 
-                {/* Title */}
                 <h1 className="text-4xl md:text-5xl font-bold leading-tight group-hover:text-gray-800 transition-colors">
                   {breaking[0].title}
                 </h1>
 
-                {/* Description */}
                 <p className="text-lg text-gray-600 max-w-3xl">
                   {breaking[0].description}
                 </p>
+
               </div>
 
             </article>
+
           </Link>
+
         </section>
       )}
 
       {/* Trending */}
+
       {trending?.length ? (
+
         <section>
+
           <h2 className="text-2xl font-bold mb-4">📈 Trending</h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
             {trending.map((article) => (
+
               <Link key={article.id} href={`/news/${article.slug}`}>
+
                 <div className="border rounded-lg overflow-hidden hover:shadow transition cursor-pointer">
 
                   <div className="relative w-full h-40">
+
                     <Image
                       src={
                         article.image_url ||
@@ -158,28 +165,40 @@ export default async function Home() {
                       alt={article.title}
                       fill
                       className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 25vw"
+                      sizes="(max-width:768px) 50vw, 25vw"
+                      quality={90}
                     />
+
                   </div>
 
                   <div className="p-4">
+
                     <p className="text-xs text-gray-500 mb-2">
-                      {article.categories?.[0]?.name} {timeAgo(article.published_at)} • {article.source}
+                      {article.categories?.[0]?.name} {" "}
+                      {timeAgo(article.published_at)} •{" "}
+                      {article.source}
                     </p>
 
                     <h3 className="font-semibold line-clamp-2">
                       {article.title}
                     </h3>
+
                   </div>
 
                 </div>
+
               </Link>
+
             ))}
+
           </div>
+
         </section>
+
       ) : null}
 
-      {/* More News */}
+      {/* Infinite Scroll Section */}
+
       <InfiniteMoreNews initialArticles={more || []} />
 
     </main>
